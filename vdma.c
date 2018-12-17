@@ -40,16 +40,17 @@ static void zynq_v4l2_wq_function(struct work_struct *work)
 	/* we will copy to oldest queued buffer */
 	slot = zynq_v4l2_find_oldest_slot(dp->ctrl.queue_bits, dp->ctrl.latest_frame);
 
-	dp->ctrl.latest_frame = slot;
-	dp->ctrl.active_bits |= (1 << slot);
+	if (slot != -1) {
+		dp->ctrl.latest_frame = slot;
+		dp->ctrl.active_bits |= (1 << slot);
+		if (dp->mem.mmap) {
+			/* invalidate dcache */
+			dma_sync_single_for_cpu(dp->dma_dev, dp->vdma.phys_wb + dp->frame.size * wb, dp->frame.size, DMA_FROM_DEVICE);
 
-	if (dp->mem.mmap) {
-		/* invalidate dcache */
-		dma_sync_single_for_cpu(dp->dma_dev, dp->vdma.phys_wb + dp->frame.size * wb, dp->frame.size, DMA_FROM_DEVICE);
-
-		memcpy((void *)((unsigned long)dp->mem.mmap + dp->frame.size * slot),
-			   (void *)((unsigned long)dp->vdma.virt_wb + dp->frame.size * wb),
-			   dp->frame.size);
+			memcpy((void *)((unsigned long)dp->mem.mmap + ALIGN(dp->frame.size, PAGE_SIZE) * slot),
+				   (void *)((unsigned long)dp->vdma.virt_wb + dp->frame.size * wb),
+				   dp->frame.size);
+		}
 	}
 
 	spin_unlock_irq(&dp->lock);

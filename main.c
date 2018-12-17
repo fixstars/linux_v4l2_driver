@@ -68,7 +68,7 @@ static int zynq_v4l2_close(struct inode *inode, struct file *filp)
 		#ifdef USE_VMALLOC
 		vfree(dp->mem.mmap);
 		#else /* !USE_VMALLOC */
-		dma_free_coherent(dp->dma_dev, dp->frame.size * dp->frame.user_count, dp->mem.mmap, dp->mem.phys_mmap);
+		dma_free_coherent(dp->dma_dev, ALIGN(dp->frame.size, PAGE_SIZE) * dp->frame.user_count, dp->mem.mmap, dp->mem.phys_mmap);
 		#endif /* !USE_VMALLOC */
 		dp->mem.mmap = NULL;
 	}
@@ -161,7 +161,7 @@ static int zynq_v4l2_mmap(struct file *filp, struct vm_area_struct *vma)
 
 	PRINTK(KERN_INFO "%s\n", __FUNCTION__);
 
-	if (vma->vm_pgoff + vma_pages(vma) > ((dp->frame.size * dp->frame.user_count + PAGE_SIZE - 1) >> PAGE_SHIFT)) {
+	if ((vma->vm_pgoff + vma_pages(vma)) > ((ALIGN(dp->frame.size, PAGE_SIZE) * dp->frame.user_count) >> PAGE_SHIFT)) {
 		return -EINVAL;
 	}
 
@@ -312,7 +312,7 @@ static void zynq_v4l2_free_data_all(struct zynq_v4l2_sys_data *sp)
 			#ifdef USE_VMALLOC
 			vfree(dp->mem.mmap);
 			#else /* !USE_VMALLOC */
-			dma_free_coherent(dp->dma_dev, dp->frame.size * dp->frame.user_count, dp->mem.mmap, dp->mem.phys_mmap);
+			dma_free_coherent(dp->dma_dev, ALIGN(dp->frame.size, PAGE_SIZE) * dp->frame.user_count, dp->mem.mmap, dp->mem.phys_mmap);
 			#endif /* !USE_VMALLOC */
 		}
 	}

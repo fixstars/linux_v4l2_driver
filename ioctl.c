@@ -178,18 +178,18 @@ long zynq_v4l2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		dp->frame.user_count = req.count;
 		#ifdef USE_VMALLOC
-		dp->mem.mmap = vmalloc(dp->frame.size * req.count);
+		dp->mem.mmap = vmalloc(ALIGN(dp->frame.size, PAGE_SIZE) * req.count);
 		#else /* !USE_VMALLOC */
-		dp->mem.mmap = dma_alloc_coherent(dp->dma_dev, dp->frame.size * req.count, &dp->mem.phys_mmap, GFP_KERNEL);
+		dp->mem.mmap = dma_alloc_coherent(dp->dma_dev, ALIGN(dp->frame.size, PAGE_SIZE) * req.count, &dp->mem.phys_mmap, GFP_KERNEL);
 		#endif /* !USE_VMALLOC */
 		PRINTK(KERN_INFO "dp->mem.mmap = %p\n", dp->mem.mmap);
-		if (!dp->mem.mmap) {
+		if (IS_ERR_OR_NULL(dp->mem.mmap)) {
 			return -ENOMEM;
 		}
 		#ifdef USE_VMALLOC
 		/* assign physical memory */
 		offset = 0;
-		while (offset < dp->frame.size * req.count) {
+		while (offset < ALIGN(dp->frame.size, PAGE_SIZE) * req.count) {
 			*((uint32_t *)((size_t)dp->mem.mmap + offset)) = 0;
 			offset += PAGE_SIZE;
 		}
@@ -209,7 +209,7 @@ long zynq_v4l2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			return -EINVAL;
 		}
 		buf.length = dp->frame.size;
-		buf.m.offset = buf.index * dp->frame.size;
+		buf.m.offset = ALIGN(dp->frame.size, PAGE_SIZE) * buf.index;
 		if (raw_copy_to_user((void __user *)arg, &buf, sizeof(buf))) {
 			return -EFAULT;
 		}
