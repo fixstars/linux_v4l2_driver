@@ -12,7 +12,7 @@
 #define PRINTK(fmt, ...)
 #endif
 
-#define YUYVOUT
+//#define YUYVOUT
 #define USE_VMALLOC
 
 #define DRIVER_NAME  "v4l2"
