@@ -1,6 +1,6 @@
 HOST_ARCH          ?= $(shell uname -m | sed -e s/arm.*/arm/ -e s/aarch64.*/arm64/)
 ARCH               ?= arm64
-KERNEL_SRC_DIR     ?= ../linux-headers-4.14.0-xlnx-v2018.2-zynqmp-fpga
+KERNEL_SRC_DIR     ?= ../headers/linux-headers-4.14.0-xlnx-v2018.2-zynqmp-fpga
 XLNX_SDK_DIR       ?= ../../../ultra96_design/ultra96_design.sdk/standalone_bsp_0/psu_cortexa53_0
 XLNX_HDR_DIR       ?= $(XLNX_SDK_DIR)/include
 XLNX_VDMA_DIR      ?= $(XLNX_SDK_DIR)/libsrc/axivdma_v6_5/src
