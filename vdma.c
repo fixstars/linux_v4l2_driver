@@ -218,7 +218,7 @@ int zynq_v4l2_vdma_init(struct device *dev, struct zynq_v4l2_sys_data *sp)
 			goto error;
 		}
 
-		dp->vdma.irq_num = irq_of_parse_and_map(dev->of_node, 0) + minor;
+		dp->vdma.irq_num = irq_of_parse_and_map(dev->of_node, minor);
 		rc = request_irq(dp->vdma.irq_num, zynq_v4l2_vdma_isr, IRQF_SHARED | IRQF_NO_SUSPEND, "vdma", dp);
 		if (rc) {
 			printk(KERN_ERR "request_irq = %d %d\n", rc, minor);

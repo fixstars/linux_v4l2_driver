@@ -9,8 +9,8 @@
 #include "zynq_v4l2.h"
 
 MODULE_DESCRIPTION("ZYNQ v4l2 device driver");
-MODULE_AUTHOR("osawa");
-MODULE_LICENSE("Dual BSD/GPL");
+MODULE_AUTHOR("takashi.osawa");
+MODULE_LICENSE("GPL");
 
 int vdma_h_res = 640;
 int vdma_v_res = 480;
