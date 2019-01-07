@@ -107,7 +107,7 @@ static unsigned int zynq_v4l2_poll(struct file *filp, struct poll_table_struct *
 	struct zynq_v4l2_dev_data *dp = filp->private_data;
 	int slot, rc;
 
-	PRINTK(KERN_INFO "%s\n", __FUNCTION__);	
+	PRINTK(KERN_INFO "%s\n", __FUNCTION__);
 
 	spin_lock_irq(&dp->lock);
 	slot = zynq_v4l2_find_oldest_slot(dp->ctrl.active_bits, dp->ctrl.latest_frame);
