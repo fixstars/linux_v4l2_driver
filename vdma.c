@@ -61,6 +61,10 @@ static void zynq_v4l2_wq_function(struct work_struct *work)
 	PRINTK(KERN_INFO "wb = %d, slot = %d, active_bits = %d, latest_frame = %d\n", wb, slot, dp->ctrl.active_bits, dp->ctrl.latest_frame);
 
 	kfree(ws);
+
+	spin_lock_irq(&dp->lock);
+	dp->ctrl.work_queue_active = false;
+	spin_unlock_irq(&dp->lock);
 }
 
 static irqreturn_t zynq_v4l2_vdma_isr(int irq, void *dev)
@@ -82,15 +86,16 @@ static irqreturn_t zynq_v4l2_vdma_isr(int irq, void *dev)
 	if (PendingIntr & XAXIVDMA_IXR_COMPLETION_MASK) {
 		spin_lock(&dp->lock);
 		slot = zynq_v4l2_find_oldest_slot(dp->ctrl.queue_bits, dp->ctrl.latest_frame);
-		spin_unlock(&dp->lock);
-		if (slot != -1) {
+		if (slot != -1 && !dp->ctrl.work_queue_active) {
 			work = (struct zynq_v4l2_work_struct *)kmalloc(sizeof(struct zynq_v4l2_work_struct), GFP_ATOMIC);
 			if (work) {
 				INIT_WORK((struct work_struct *)work, zynq_v4l2_wq_function);
 				work->dp = dp;
 				queue_work(dp->sp->wq, (struct work_struct *)work);
+				dp->ctrl.work_queue_active = true;
 			}
 		}
+		spin_unlock(&dp->lock);
 	}
 
     return IRQ_HANDLED;

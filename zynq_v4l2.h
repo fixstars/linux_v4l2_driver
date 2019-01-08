@@ -37,6 +37,7 @@ struct zynq_v4l2_ctrl_data {
 	uint32_t           active_bits;
 	int                latest_frame;
 	wait_queue_head_t  waitq;
+	volatile bool      work_queue_active;
 };
 
 struct zynq_v4l2_mem_data {

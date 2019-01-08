@@ -60,6 +60,7 @@ static int zynq_v4l2_close(struct inode *inode, struct file *filp)
 	PRINTK(KERN_INFO "%s\n", __FUNCTION__);
 
 	zynq_v4l2_vdma_intr_disable(dp);
+	while (dp->ctrl.work_queue_active) {;}
 	spin_lock_irq(&dp->lock);
 	dp->ctrl.queue_bits = 0;
 	dp->ctrl.active_bits = 0;
