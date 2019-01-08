@@ -43,6 +43,8 @@ static void zynq_v4l2_wq_function(struct work_struct *work)
 	if (slot != -1) {
 		dp->ctrl.latest_frame = slot;
 		dp->ctrl.active_bits |= (1 << slot);
+		spin_unlock_irq(&dp->lock);
+
 		if (dp->mem.mmap) {
 			/* invalidate dcache */
 			dma_sync_single_for_cpu(dp->dma_dev, dp->vdma.phys_wb + dp->frame.size * wb, dp->frame.size, DMA_FROM_DEVICE);
@@ -51,9 +53,9 @@ static void zynq_v4l2_wq_function(struct work_struct *work)
 				   (void *)((unsigned long)dp->vdma.virt_wb + dp->frame.size * wb),
 				   dp->frame.size);
 		}
+	} else {
+		spin_unlock_irq(&dp->lock);
 	}
-
-	spin_unlock_irq(&dp->lock);
 
 	wake_up_interruptible(&dp->ctrl.waitq);
 	PRINTK(KERN_INFO "wb = %d, slot = %d, active_bits = %d, latest_frame = %d\n", wb, slot, dp->ctrl.active_bits, dp->ctrl.latest_frame);
