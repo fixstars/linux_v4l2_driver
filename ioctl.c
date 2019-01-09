@@ -164,6 +164,9 @@ long zynq_v4l2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		return 0;
 	case VIDIOC_REQBUFS:
+		if (dp->mem.mmap) {
+			return -EINVAL;
+		}
 		if (raw_copy_from_user(&req, (void __user *)arg, sizeof(req))) {
 			return -EFAULT;
 		}

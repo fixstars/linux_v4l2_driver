@@ -91,8 +91,11 @@ static irqreturn_t zynq_v4l2_vdma_isr(int irq, void *dev)
 			if (work) {
 				INIT_WORK((struct work_struct *)work, zynq_v4l2_wq_function);
 				work->dp = dp;
-				queue_work(dp->sp->wq, (struct work_struct *)work);
-				dp->ctrl.work_queue_active = true;
+				if (queue_work(dp->sp->wq, (struct work_struct *)work)) {
+					dp->ctrl.work_queue_active = true;
+				} else {
+					kfree(work);
+				}
 			}
 		}
 		spin_unlock(&dp->lock);

@@ -64,7 +64,9 @@ static int zynq_v4l2_close(struct inode *inode, struct file *filp)
 	dp->ctrl.queue_bits = 0;
 	dp->ctrl.active_bits = 0;
 	spin_unlock_irq(&dp->lock);
-	while (dp->ctrl.work_queue_active) {;}
+	while (dp->ctrl.work_queue_active) {
+		schedule();
+	}
 	if (dp->mem.mmap) {
 		#ifdef USE_VMALLOC
 		vfree(dp->mem.mmap);
